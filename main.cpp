@@ -15,8 +15,20 @@
 
 static const char* usage = "Usage:\n\ttseaBattle [address]";
 
+enum Colors {
+        NONE = 1,
+        CURRENT = 2,
+        MISS = 3,
+        HIT = 4
+};
+
 void initCurses(){
 	initscr();
+        start_color();
+        init_pair(NONE, COLOR_WHITE, COLOR_BLACK);
+        init_pair(CURRENT, COLOR_GREEN, COLOR_BLACK);
+        init_pair(MISS, COLOR_BLUE, COLOR_BLACK);
+        init_pair(HIT, COLOR_RED, COLOR_BLACK);
 	cbreak();
 	noecho();
 	nonl();
@@ -35,16 +47,16 @@ void drawPlacement(Board* b, int x, int y, bool h){
 	for(int i = 0; i < 10; i++){
                 addch(w);
 		for(int j = 0; j < 10; j++){
-                        if(board[j][i]){
+                        if((h && y == i && j >= x && j < x+shipSize)||(!h && x == j && i >= y && i < y+shipSize)){
+                                attron(COLOR_PAIR(CURRENT));
                                 addch(SHIP_SEGMENT);
-                        }else{
-                                if((h && y == i && j >= x && j < x+shipSize)||(!h && x == j && i >= y && i < y+shipSize)){
-                                        addch(SHIP_SEGMENT);
-                                }else{
-                                        addch(' ');
-                                }
+                                attron(COLOR_PAIR(NONE));
+                        } else if(board[j][i]) {
+                                addch(SHIP_SEGMENT);
+                        } else {
+                                addch(' ');
                         }
-			addch(' ');
+                addch(' ');
 		}
                 addch('\b');
 		addch(w);
@@ -67,10 +79,16 @@ void drawGame(Board* b, int x, int y, bool l[][10], int enemyBoard[][10], bool m
 	for(int i = 0; i < 10; i++){
                 addch(w);
 		for(int j = 0; j < 10; j++){
-			if(l[j][i] && board[j][i])
+			if(l[j][i] && board[j][i]) {
+                                attron(COLOR_PAIR(HIT));
                                 addch('X');
-                        else if(l[j][i])
+                                attron(COLOR_PAIR(NONE));
+                        }
+                        else if(l[j][i]) {
+                                attron(COLOR_PAIR(MISS));
                                 addch('*');
+                                attron(COLOR_PAIR(NONE));
+                        }
                         else if(board[j][i])
                                 addch('#');
                         else
@@ -82,12 +100,21 @@ void drawGame(Board* b, int x, int y, bool l[][10], int enemyBoard[][10], bool m
 		addstr(p);
 		addch(w);
 		for(int j = 0; j < 10; j++){
-                        if(x == j && y == i)
+                        if(x == j && y == i) {
+                                attron(COLOR_PAIR(CURRENT));
 			        addch('+');
-                        else if(enemyBoard[j][i] > 0)
+                                attron(COLOR_PAIR(NONE));
+                        }
+                        else if(enemyBoard[j][i] > 0) {
+                                attron(COLOR_PAIR(HIT));
                                 addch('X');
-                        else if(enemyBoard[j][i] < 0)
+                                attron(COLOR_PAIR(NONE));
+                        }
+                        else if(enemyBoard[j][i] < 0) {
+                                attron(COLOR_PAIR(MISS));
                                 addch('*');
+                                attron(COLOR_PAIR(NONE));
+                        }
                         else
                                 addch(' ');
 			addch(' ');
@@ -170,13 +197,13 @@ int main(int argc, char* argv[]){
                                 break;
                         case 82:
                                 b->reset();
-                                x = 0;
-                                y = 0;
+                                 x = 0;
+                                 y = 0;
                                 break;
                         case 13:
                                 if(b->place(x, y, h)){
-                                        x = 0;
-                                        y = 0;
+                                     //  x = 0;
+                                     //  y = 0;
                                 }
                                 break;
                         default:

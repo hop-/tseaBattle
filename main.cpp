@@ -154,7 +154,7 @@ int main(int argc, char* argv[]){
                 connection = new TCPServer(PNAME);
                 me = true;
         }else if(argc == 2){
-                connection = new TCPClient(PNAME, argv[1]);
+                connection = new TCPClient(argv[1], PNAME);
                 me = false;
         }else{
                 std::cout<<usage<<std::endl;
